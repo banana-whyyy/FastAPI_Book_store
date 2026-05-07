@@ -1,7 +1,5 @@
 # Описание того, как выглядит JSON, который приходит и уходит через API
 from pydantic import BaseModel, Field, ConfigDict
-import uuid
-from fastapi_users import schemas
 
 
 # Описание схем автороов
@@ -44,13 +42,17 @@ class BookUpdate(BookBase):
 
 
 # Описание схем пользователей
-class UserCreate(schemas.BaseUserCreate):
-    nickname: str
+class UserBase(BaseModel):
+    nickname: str = Field(..., min_length=1, max_length=200, description="User nickname")
 
 
-class UserRead(schemas.BaseUser[uuid.UUID]):
-    nickname: str
+class UserCreate(UserBase):
+    pass
 
 
-class UserUpdate(schemas.BaseUserUpdate):
-    nickname: str
+class UserRead(UserBase):
+    id: int = Field(..., description="Unique user ID")
+
+
+class UserUpdate(UserBase):
+    nickname: str | None = Field(None, min_length=1, max_length=200, description="User nickname")

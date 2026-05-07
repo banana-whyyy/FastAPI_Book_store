@@ -2,7 +2,6 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, Integer, String
 from typing import List
-from fastapi_users.db import SQLAlchemyBaseUserTableUUID
 
 
 class Base(DeclarativeBase):
@@ -26,5 +25,6 @@ class Book(Base):
     author:  Mapped["Author"] = relationship(back_populates="books")
 
 
-class User(SQLAlchemyBaseUserTableUUID, Base):
-    nickname: Mapped[str] = mapped_column(String, index=True)
+class User(Base):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    nickname: Mapped[str] = mapped_column(String, index=True, nullable=False)
