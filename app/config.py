@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     db_port: int = Field(default=5432, alias="DB_PORT")
     db_host: str = Field(default="localhost", alias="DB_HOST")
 
+    secret_key: str = "super-secret-key"
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+
     model_config = SettingsConfigDict(env_file=".env")
 
 
