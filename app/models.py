@@ -1,30 +1,66 @@
 # Создание таблиц в базе данных
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, Integer, String
-from typing import List
+from sqlalchemy import ForeignKey, Integer, String, Text
+
+import enum
+from datetime import date, datetime
 
 
 class Base(DeclarativeBase):
     pass
 
 
-class Author(Base):
-    __tablename__ = "author"
+class UserRole(str, enum.Enum):
+    ADMIN = 'admin'
+    USER = "user"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String, index=True)
-    books: Mapped[List["Book"]] = relationship(back_populates="author")
+
+class Author(Base):
+    __tablename__ = "authors"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(index=True)
+    bio: Mapped[str | None] = mapped_column(Text)
+    birth_date: Mapped[date]
+
+    books: Mapped[list["Book"]] = relationship(back_populates="authors", lazy="selectin")
 
 
 class Book(Base):
-    __tablename__ = "book"
+    __tablename__ = "books"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    title: Mapped[str] = mapped_column(String, index=True)
-    author_id: Mapped[int] = mapped_column(ForeignKey("author.id"))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(index=True)
+    author_id: Mapped[int] = mapped_column(ForeignKey("authors.id"))
+    description: Mapped[str] = mapped_column(Text)
+    price: Mapped[int]
+    stock_quanity: Mapped[int] = mapped_column(default=0)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
     author:  Mapped["Author"] = relationship(back_populates="books")
 
 
 class User(Base):
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    nickname: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nickname: Mapped[str] = mapped_column(index=True, nullable=False)
+    password: Mapped[str] = mapped_column(String(255))
+    role: Mapped[UserRole] = mapped_column(default=UserRole.USER)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+
+    orders: Mapped[list["Order"]] = relationship(back_populates="users", lazy="selectin")
+
+
+class Order(Base):
+    __tablename__ = "orders"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    book_id: Mapped[int] = mapped_column(ForeignKey("books.id"))
+    quantity: Mapped[int]
+    total_price: Mapped[int]
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+    user: Mapped["User"] = relationship(back_populates="orders", lazy="joined")
+    book: Mapped["Book"] = relationship(lazy="joined")
