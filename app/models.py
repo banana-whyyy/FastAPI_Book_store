@@ -44,7 +44,7 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    nickname: Mapped[str] = mapped_column(index=True, nullable=False)
+    username: Mapped[str] = mapped_column(index=True, nullable=False)
     password: Mapped[str] = mapped_column(String(255))
     role: Mapped[UserRole] = mapped_column(default=UserRole.USER)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
