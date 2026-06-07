@@ -1,17 +1,53 @@
 # Сессии базы данных, текущий пользователь, проверка ролей
-from typing import Annotated
-from fastapi import Depends, FastAPI
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Depends, HTTPException, status
 
-app = FastAPI()
+from app.crud import get_user
+from app.database import get_db
+from app.security import decode_token
+from app.models import User, UserRole
+
+security = HTTPBearer()
 
 
-async def common_parameters(q: str | None = None, skip: int = 0, limit: int = 100):
-    return {"q": q, "skip": skip, "limit": limit}
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(get_db)
+) -> User:
+    token = credentials.credentials
+    payload = decode_token(token)
 
-@app.get("/items/")
-async def read_items(commons: Annotated[dict, Depends(common_parameters)]):
-    return commons
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+        )
+    
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload",
+        )
+    
+    user = await get_user(db, int(user_id))
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+    
+    return user
 
-@app.get("/users/")
-async def read_users(commons: Annotated[dict, Depends(common_parameters)]):
-    return commons
+
+async def get_admin_user(
+    current_user: User = Depends(get_current_user),
+    ) -> User:
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    
+    return current_user
