@@ -37,7 +37,7 @@ async def create_author(db: AsyncSession, author: AuthorCreate) -> Author:
 
 async def get_book(db: AsyncSession, book_id: int) -> Book | None:
     result = await db.execute(
-        select(Book).options(selectinload(Book)).where(Book.id == book_id)
+        select(Book).where(Book.id == book_id)
     )
     return result.scalar_one_or_none()
 
@@ -66,7 +66,7 @@ async def create_book(db: AsyncSession, book: BookCreate) -> Book:
     db_book = Book(**book.model_dump())
     db.add(db_book)
     await db.flush()
-    await db.refresh(db.book)
+    await db.refresh(db_book)
     return db_book
 
 
@@ -113,6 +113,7 @@ async def get_user_by_username(db: AsyncSession, username: str) -> User | None:
     result = await db.execute(
         select(User).options(selectinload(User)).where(User.username== username)
     )
+    return result.scalar_one_or_none()
 
 
 async def create_user(db: AsyncSession, user: UserCreate) -> User:
