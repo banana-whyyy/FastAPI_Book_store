@@ -84,6 +84,15 @@ async def update_book(db: AsyncSession, book_update: BookUpdate, book_id: int) -
     return db_book
 
 
+async def delete_book(db: AsyncSession, book_id: int) -> bool:
+    db_book = await get_book(db, book_id)
+    if not db_book:
+        return False
+    await db.delete(get_book(db, book_id))
+    await db.flush()
+    return True
+
+
 async def get_book_for_update(db: AsyncSession, book_id: int) -> Book | None:
     from sqlalchemy.orm import lazyload
     result = await db.execute(
