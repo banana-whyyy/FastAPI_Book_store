@@ -18,13 +18,16 @@ async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
             detail="Username already register",
         )
     
-    if await get_user_by_email(db, user.username):
+    if await get_user_by_email(db, user.email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already register",
         )
     
-    return await create_user(db, user)
+    new_user = await create_user(db, user)
+
+    await db.commit()
+    return new_user
 
 
 @router.post("/login", response_model=Token)

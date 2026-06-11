@@ -9,6 +9,12 @@ app = FastAPI(
 )
 
 
+app.include_router(auth.router)
+app.include_router(books.router)
+app.include_router(authors.router)
+app.include_router(orders.router)
+
+
 @app.get("/")
 async def root():
     return {
@@ -23,6 +29,6 @@ async def root():
     }
 
 
-@app.get()
+@app.get("/health")
 async def health_check():
     return {"status": "ok"}

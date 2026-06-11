@@ -23,7 +23,7 @@ class Author(Base):
     bio: Mapped[str | None] = mapped_column(Text)
     birth_date: Mapped[date]
 
-    books: Mapped[list["Book"]] = relationship(back_populates="authors", lazy="selectin")
+    books: Mapped[list["Book"]] = relationship(back_populates="author", lazy="selectin")
 
 
 class Book(Base):
@@ -34,7 +34,7 @@ class Book(Base):
     author_id: Mapped[int] = mapped_column(ForeignKey("authors.id"))
     description: Mapped[str] = mapped_column(Text)
     price: Mapped[int]
-    stock_quanity: Mapped[int] = mapped_column(default=0)
+    stock_quantity: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     author:  Mapped["Author"] = relationship(back_populates="books")
@@ -44,12 +44,12 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(index=True, nullable=False)
+    username: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     password: Mapped[str] = mapped_column(String(255))
     role: Mapped[UserRole] = mapped_column(default=UserRole.USER)
-    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
 
-    orders: Mapped[list["Order"]] = relationship(back_populates="users", lazy="selectin")
+    orders: Mapped[list["Order"]] = relationship(back_populates="user", lazy="selectin")
 
 
 class Order(Base):

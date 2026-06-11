@@ -88,7 +88,7 @@ async def delete_book(db: AsyncSession, book_id: int) -> bool:
     db_book = await get_book(db, book_id)
     if not db_book:
         return False
-    await db.delete(get_book(db, book_id))
+    await db.delete(db_book)
     await db.flush()
     return True
 
@@ -143,11 +143,11 @@ async def create_order(db:AsyncSession, user_id: int, order_data: OrderCreate) -
     if not book:
         raise ValueError("Book not found")
     
-    if book.stock_quanity < order_data.quantity:
+    if book.stock_quantity < order_data.quantity:
         raise ValueError(
-            f"Not enough stock. Available: {book.stock_quanity}, requested: {order_data.quantity}"
+            f"Not enough stock. Available: {book.stock_quantity}, requested: {order_data.quantity}"
         )
-    book.stock_quanity -= order_data.quantity
+    book.stock_quantity -= order_data.quantity
 
     order = Order(
         user_id=user_id,
