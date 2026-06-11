@@ -15,7 +15,7 @@ class AuthorBase(BaseModel):
     @field_validator("birth_date")
     @classmethod
     def not_in_future(cls, d: date) -> date:
-        if d > date.today:
+        if d > date.today():
             raise ValueError("birth date cannot be in future")
         return d
 
@@ -61,7 +61,7 @@ class BookResponse(BaseModel):
 class BookUpdate(BaseModel):
     title: str | None = Field(None, min_length=1, max_length=200, description="Book title")
     description: str | None = None
-    price: int | None = Field(..., ge=0)
+    price: int | None = Field(default=None, ge=0)
     stock_quantity: int | None = Field(default=None, ge=0)
 
 
@@ -83,7 +83,7 @@ class AuthorWithBookResponse(AuthorResponse):
 
 # Описание схем пользователей
 class UserCreate(BaseModel):
-    username: str = Field(..., min_length=3, max_digits=100)
+    username: str = Field(..., min_length=3, max_length=100)
     email: EmailStr
     password: str = Field(..., min_length=6)
 
