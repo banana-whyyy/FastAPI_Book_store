@@ -1,16 +1,28 @@
 # Главное в приложении
-from typing import Annotated
-from fastapi import FastAPI, Path, Query
+from fastapi import FastAPI
+from app.routers import auth, books, authors, orders
+
+app = FastAPI(
+    title="Book store",
+    description="REST API for managing books, authors and orders",
+    version="1.0.0",
+)
 
 
-app = FastAPI()
+@app.get("/")
+async def root():
+    return {
+        "message": "Book Store API",
+        "docs": "/docs",
+        "endpoints": {
+            "books": "/books",
+            "authors": "/authors", 
+            "auth": "/auth/register, /auth/login",
+            "orders": "/orders"
+        }
+    }
 
 
-@app.post("/items/{item_id}")
-async def read_items(
-    item_id: Annotated[int, Path(title="The ID of the item to get")],
-    q: Annotated[str | None, Query(alias="item-query")] = None):
-    results = {"item_id": item_id}
-    if q:
-        results.update({"q": q})
-    return results
+@app.get()
+async def health_check():
+    return {"status": "ok"}
